@@ -11,42 +11,77 @@ client.on('message', message => {
       }
 });
 
-const ms = require("ms");
-const fs = require("fs");        
+client.on('message',function(message) {
+    let muteRole = message.guild.roles.find(r => r.name === "Muted");
+    let muteId = message.mentions.users.first();
+    let messageArray = message.content.split(" ");
+    let muteReason = messageArray[3];
+    let Swearing = '1h';
+    let Advertising = '4h';
+    let Spam = '2h';
+   if(message.content.startsWith(prefix + "mute")) {
+       if(!muteRole) return message.guild.createRole({ name: "Muted", permissions: [] });
+       if(!message.guild.member(message.author).hasPermission("MANAGE_ROLES")) return message.channel.send("**- You don't have the needed permissions!**");
+       if(!muteId) return message.channel.send("**- Mention someone!**");
+       if(muteId === message.author) return message.channel.send('**- You cannot mute yourself!**');
+       if(muteId === client.user) return message.channel.send('**- You cannot mute me!**');
+       message.guild.channels.forEach((channel, id) => {
+      message.channel.overwritePermissions(muteRole, {
+        SEND_MESSAGES: false,
+        ADD_REACTIONS: false
+      });
+    });
+    message.channel.send(`
+    \`\`\`ml
+" قم بأختيار رقم السبب "
+1 : السب و الشتم
+2 : النشر
+3 : السبام
+\`\`\`
+__امامك 20 ثانية للاختيار__`)
+.then(() => {
+  message.channel.awaitMessages(response => response.content === '1', {
+    max: 1,
+    time: 20000,
+    errors: ['time'],
+  })
+  .then((collected) => {
+      message.guild.member(muteId).addRole(muteRole)
+      .then(() => { setTimeout(() => {
+           message.guild.member(muteId).removeRole(muteRole);
+       }, mmss(Swearing));
+       message.channel.send(`**تم!, تم اعطاء ميوت لـ${muteId} بسبب السب و الشم**`);
+      });
+    });
 
-  client.on('message', message => {
-
-               if (message.author.bot) return;
-    if (!message.channel.guild) return;
-    if (message.content.startsWith(prefix + 'id')) {
-             if(!message.channel.guild) return message.reply('** This command only for servers**');
-     var args = message.content.split(" ").slice(2);
-     let men = message.mentions.users.first();
-      var heg;
-      if(men) {
-          heg = men
-      } else {
-            heg = message.author
-        }
-      var mentionned = message.mentions.members.first();
-         var h;
-        if(mentionned) {
-            h = mentionned
-        } else {
-            h = message.member
-        }
-               moment.locale('ar-TN');
-      var id = new  Discord.RichEmbed()
-    .setColor("RANDOM")
-    .setTitle(``)
-                  .setThumbnail(message.author.avatarURL)
-    .addField(':تآريخ انضمامك للسيرفر ', `${moment(h.joinedAt).format('YYYY/M/D HH:mm:ss')} \n \`${moment(h.joinedAt).fromNow()}\``, true)
-    .addField(': تاريخ دخولك للديسكورد', `${moment(heg.createdTimestamp).format('YYYY/M/D HH:mm:ss')} **\n** \`${moment(heg.createdTimestamp).fromNow()}\`` ,true)
-    .setFooter(`${message.guild.name} Server`)
-   .setThumbnail(`${message.author.avatarURL}`)
-    message.channel.send(id)
-}   
-          
+message.channel.awaitMessages(response => response.content === '2', {
+    max: 1,
+    time: 20000,
+    errors: ['time'],
+  })
+  .then((collected) => {
+      message.guild.member(muteId).addRole(muteRole)
+      .then(() => { setTimeout(() => {
+           message.guild.member(muteId).removeRole(muteRole);
+       }, mmss(Advertising));
+       message.channel.send(`**تم اعطاء ميوت لـ${muteId} بسبب النشر**`);
+      });
+    });
+message.channel.awaitMessages(response => response.content === '3', {
+    max: 1,
+    time: 20000,
+    errors: ['time'],
+  })
+  .then((collected) => {
+      message.guild.member(muteId).addRole(muteRole)
+      .then(() => { setTimeout(() => {
+           message.guild.member(muteId).removeRole(muteRole);
+       }, mmss(Spam));
+       message.channel.send(`**تم اعطاء ميوت لـ${muteId} بسبب السبام**`);
+      });
+    });
+   });
+   }
 });
 
 
